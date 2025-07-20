@@ -1,1 +1,1 @@
-# RAGChat
+#GuruChat
