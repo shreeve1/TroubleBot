@@ -1,0 +1,24 @@
+{
+  "name": "gurutech",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GuruTech - AI-Powered Virtual Assistant Platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "~2.0.1"
+  },
+  "packageManager": "npm@10.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
