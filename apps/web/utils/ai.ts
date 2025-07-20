@@ -154,32 +154,23 @@ Keep it conversational and focused on gathering the right information to provide
       const userMessages = messages.filter(m => m.role === 'user')
       const lastUserMessage = userMessages[userMessages.length - 1]?.content || 'No user message found'
       
-      return `**TECHNICAL SUPPORT TRANSCRIPT SUMMARY**
+      return `**TECHNICAL SUPPORT TRANSCRIPT**
 
-**Session Overview:**
-- Total messages exchanged: ${messageCount}
-- Primary issue: ${lastUserMessage.slice(0, 100)}${lastUserMessage.length > 100 ? '...' : ''}
+**Issue:** User reported technical difficulties requiring troubleshooting assistance. ${messageCount} messages exchanged during session.
 
-**Troubleshooting Steps Taken:**
-1. Initial problem assessment and information gathering
-2. Diagnostic questions to isolate the root cause
-3. Suggested troubleshooting procedures based on common solutions
-4. Escalation recommended due to complexity of the issue
+**Steps Taken:**
+• Conducted initial problem assessment and diagnostic questioning
+• Applied standard troubleshooting protocols for the reported issue
 
-**Key Technical Details:**
-- User described technical difficulties requiring specialized attention
-- Standard troubleshooting protocols were followed
-- Issue appears to require advanced technical intervention
+**Technical Details:**
+• Issue: ${lastUserMessage.slice(0, 80)}${lastUserMessage.length > 80 ? '...' : ''}
+• Standard solutions attempted but issue persists
 
-**Recommendation:**
-This case requires escalation to a human technician for specialized troubleshooting. The conversation history shows a complex technical issue that would benefit from hands-on expertise.
+**Status & Next Steps:**
+• Issue unresolved, requires advanced technical intervention
+• Recommend assignment to Level 2 support for specialized troubleshooting
 
-**Next Steps:**
-- Assign to Level 2 technical support
-- Review full conversation history for additional context
-- Consider scheduling follow-up session if needed
-
-*This is a mock transcript generated for testing purposes. Configure GEMINI_API_KEY for actual TroubleBot AI-generated summaries.*`
+*Mock transcript - Configure GEMINI_API_KEY for AI-generated summaries*`
     }
 
     try {
@@ -209,41 +200,30 @@ This case requires escalation to a human technician for specialized troubleshoot
   }
 
   private createSummarizationPrompt(conversationText: string): string {
-    return `You are a technical support specialist tasked with creating a comprehensive transcript summary for escalation purposes. Please analyze the following technical support conversation and create a professional summary suitable for handoff to a human technician.
+    return `You are a technical support specialist creating a CONCISE transcript summary for escalation. Analyze the conversation and create a brief, focused summary for handoff to a human technician.
 
 CONVERSATION HISTORY:
 ${conversationText}
 
-Please provide a structured summary that includes:
+Create a compact summary with these sections (keep each section to 2-3 bullet points maximum):
 
-**TECHNICAL SUPPORT TRANSCRIPT SUMMARY**
+**TECHNICAL SUPPORT TRANSCRIPT**
 
-**Session Overview:**
-- Brief description of the primary technical issue
-- Number of interactions and conversation flow
-- Overall complexity assessment
+**Issue:** [1-2 sentences describing the main problem]
 
-**Troubleshooting Steps Taken:**
-- List key diagnostic questions asked
-- Enumerate solutions attempted or suggested
-- Highlight any successful or unsuccessful approaches
+**Steps Taken:**
+• [Key diagnostic questions or solutions attempted]
+• [Most important troubleshooting effort]
 
-**Key Technical Details:**
-- Extract important technical specifications, error messages, or system information
-- Note any patterns or recurring themes in the problem
-- Identify potential root causes mentioned
+**Technical Details:**
+• [Critical error messages, specs, or system info only]
+• [Key patterns or root cause indicators]
 
-**Current Status:**
-- Summarize where the troubleshooting process stands
-- Note any progress made or remaining challenges
-- Assess urgency level
+**Status & Next Steps:**
+• [Current situation in 1 sentence]
+• [Primary recommendation for escalated technician]
 
-**Recommendation for Next Steps:**
-- Suggest specific areas for the escalated technician to focus on
-- Recommend additional diagnostic steps if needed
-- Highlight any time-sensitive aspects
-
-Keep the summary concise but comprehensive, focusing on technical accuracy and actionable information for the receiving technician. Use professional language suitable for internal documentation.`
+IMPORTANT: Keep this summary under 200 words total. Focus only on essential information needed for the next technician. Omit conversational details and stick to technical facts.`
   }
 }
 

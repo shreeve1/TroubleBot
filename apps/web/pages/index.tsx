@@ -209,7 +209,7 @@ const Home: NextPage = () => {
               data-testid="end-session-button"
             >
               <PowerIcon className="w-4 h-4" />
-              <span>End Session</span>
+              <span>Escalate</span>
             </Button>
           )}
         </div>
@@ -231,31 +231,9 @@ const Home: NextPage = () => {
                   <h3 className="text-2xl font-bold text-secondary-900 mb-3">
                     Welcome to TroubleBot AI Support
                   </h3>
-                  <p className="text-secondary-600 max-w-lg mb-6 leading-relaxed">
+                  <p className="text-secondary-600 max-w-lg mb-8 leading-relaxed">
                     I'm your AI technical support assistant. Describe your technical issue and I'll help you troubleshoot it step by step with personalized solutions.
                   </p>
-                  
-                  {/* Quick Start Examples */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
-                    <div className="p-4 bg-secondary-50 rounded-xl border border-secondary-200 text-left">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <ExclamationTriangleIcon className="w-4 h-4 text-warning-600" />
-                        <span className="text-sm font-medium text-secondary-900">Common Issues</span>
-                      </div>
-                      <p className="text-xs text-secondary-600">
-                        "My computer is running slowly" or "WiFi keeps disconnecting"
-                      </p>
-                    </div>
-                    <div className="p-4 bg-secondary-50 rounded-xl border border-secondary-200 text-left">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <CheckCircleIcon className="w-4 h-4 text-success-600" />
-                        <span className="text-sm font-medium text-secondary-900">Detailed Help</span>
-                      </div>
-                      <p className="text-xs text-secondary-600">
-                        Get step-by-step solutions with screenshots and explanations
-                      </p>
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
