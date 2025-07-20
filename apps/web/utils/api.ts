@@ -9,18 +9,29 @@ export interface ChatResponse {
   response: string
 }
 
+export interface ChatMessage {
+  id: string
+  content: string
+  role: 'user' | 'assistant'
+  timestamp: string
+}
+
+export interface ChatHistory {
+  messages: ChatMessage[]
+  sessionId: string
+  escalationReason?: string
+}
+
 export interface TranscriptRequest {
-  chatHistory: Array<{
-    role: 'user' | 'assistant'
-    content: string
-    timestamp: string
-  }>
+  chatHistory: ChatHistory
 }
 
 export interface TranscriptResponse {
-  transcript: string
-  wordCount: number
+  summary: string
   generatedAt: string
+  wordCount: number
+  sessionId: string
+  success: boolean
 }
 
 export interface ApiError {
@@ -54,7 +65,7 @@ export class ApiClient {
     return data as ChatResponse
   }
 
-  async generateTranscript(chatHistory: TranscriptRequest['chatHistory']): Promise<TranscriptResponse> {
+  async generateTranscript(chatHistory: ChatHistory): Promise<TranscriptResponse> {
     const response = await fetch(`${this.baseUrl}/api/generate-transcript`, {
       method: 'POST',
       headers: {

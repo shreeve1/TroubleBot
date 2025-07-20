@@ -127,11 +127,16 @@ const Home: NextPage = () => {
     setShowTranscriptModal(true)
 
     try {
-      const chatHistory = messages.map(msg => ({
-        role: msg.type === 'user' ? 'user' as const : 'assistant' as const,
-        content: msg.text,
-        timestamp: msg.timestamp.toISOString()
-      }))
+      const chatHistory = {
+        messages: messages.map(msg => ({
+          id: msg.id,
+          role: msg.type === 'user' ? 'user' as const : 'assistant' as const,
+          content: msg.text,
+          timestamp: msg.timestamp.toISOString()
+        })),
+        sessionId: `session-${Date.now()}`,
+        escalationReason: 'User requested escalation via End Session button'
+      }
 
       const response = await apiClient.generateTranscript(chatHistory)
       setTranscriptData(response)
@@ -441,7 +446,7 @@ const Home: NextPage = () => {
       <TranscriptModal
         isOpen={showTranscriptModal}
         onClose={handleTranscriptClose}
-        transcript={transcriptData?.transcript || ''}
+        transcript={transcriptData?.summary || ''}
         wordCount={transcriptData?.wordCount || 0}
         generatedAt={transcriptData?.generatedAt || ''}
         isLoading={transcriptLoading}
