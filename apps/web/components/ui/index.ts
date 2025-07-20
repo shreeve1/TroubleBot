@@ -7,6 +7,8 @@ export type { InputProps } from './Input'
 export { Message, messageVariants } from './Message'
 export type { MessageProps } from './Message'
 
+export { StructuredMessage } from './StructuredMessage'
+
 export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
 

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  gurutech-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: gurutech-dev
+    ports:
+      - "3080:3000"
+    environment:
+      - NODE_ENV=development
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      # Mount source code for hot reloading
+      - ./apps/web:/app/apps/web
+      - ./package.json:/app/package.json
+      - ./turbo.json:/app/turbo.json
+      # Exclude node_modules from volume mount
+      - /app/apps/web/node_modules
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - gurutech-network

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  troublebot-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: troublebot-ai-app
+    ports:
+      - "3080:3000"
+    environment:
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - NEXT_TELEMETRY_DISABLED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/hello-world"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Optional: Mount logs directory for debugging
+      - ./logs:/app/logs
+    networks:
+      - troublebot-ai-network
+
+networks:
+  troublebot-ai-network:
+    driver: bridge
+
+# Optional: For local development with hot reloading
+# Uncomment and use `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`

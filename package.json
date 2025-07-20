@@ -1,8 +1,8 @@
 {
-  "name": "gurutech",
+  "name": "troublebot-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "GuruTech - AI-Powered Virtual Assistant Platform",
+  "description": "TroubleBot AI - AI-Powered Technical Support Assistant Platform",
   "workspaces": [
     "apps/*",
     "packages/*"

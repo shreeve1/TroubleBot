@@ -19,7 +19,7 @@ export default function handler(
   }
 
   res.status(200).json({
-    message: 'Hello World from GuruTech API!',
+    message: 'Hello World from TroubleBot AI API!',
     timestamp: new Date().toISOString(),
     status: 'success'
   })

@@ -27,13 +27,14 @@ export default async function handler(
 
     const trimmedMessage = message.trim()
     
-    const aiResponse = await aiService.processMessage(trimmedMessage)
+    const { response: aiResponse, structured } = await aiService.processMessageWithStructure(trimmedMessage)
 
     res.status(200).json({
       message: 'AI response generated successfully',
       timestamp: new Date().toISOString(),
       status: 'success',
-      response: aiResponse
+      response: aiResponse,
+      structuredResponse: structured
     })
   } catch (error) {
     console.error('AI chat error:', error)

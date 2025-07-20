@@ -3,6 +3,8 @@ import type { NextPage } from 'next'
 import { apiClient, type TranscriptResponse } from '../utils/api'
 import { Layout, Header, Main, Container, Button, Input, Message, Modal } from '../components/ui'
 import { TranscriptModal } from '../components/ui/TranscriptModal'
+import { StructuredMessage } from '../components/ui/StructuredMessage'
+import { StructuredResponse } from '../types/structured-response'
 import { 
   ChatBubbleLeftRightIcon, 
   SparklesIcon, 
@@ -17,6 +19,7 @@ interface ChatMessage {
   text: string
   timestamp: Date
   type: 'user' | 'assistant'
+  structuredResponse?: StructuredResponse
 }
 
 const Home: NextPage = () => {
@@ -30,6 +33,7 @@ const Home: NextPage = () => {
   const [transcriptData, setTranscriptData] = useState<TranscriptResponse | null>(null)
   const [transcriptLoading, setTranscriptLoading] = useState<boolean>(false)
   const [transcriptError, setTranscriptError] = useState<string | null>(null)
+  const [showRawResponses, setShowRawResponses] = useState<Set<string>>(new Set())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -81,7 +85,8 @@ const Home: NextPage = () => {
         id: (Date.now() + 1).toString(),
         text: response.response,
         timestamp: new Date(response.timestamp),
-        type: 'assistant'
+        type: 'assistant',
+        structuredResponse: (response as any).structuredResponse
       }
 
       setMessages(prev => [...prev, assistantMessage])
@@ -148,6 +153,16 @@ const Home: NextPage = () => {
     setTranscriptError(null)
   }
 
+  const toggleRawResponse = (messageId: string) => {
+    const newShowRaw = new Set(showRawResponses)
+    if (newShowRaw.has(messageId)) {
+      newShowRaw.delete(messageId)
+    } else {
+      newShowRaw.add(messageId)
+    }
+    setShowRawResponses(newShowRaw)
+  }
+
   return (
     <Layout>
       <Header sticky>
@@ -156,7 +171,7 @@ const Home: NextPage = () => {
             <SparklesIcon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-secondary-900">GuruTech</h1>
+            <h1 className="text-xl font-bold text-secondary-900">TroubleBot AI</h1>
             <p className="text-sm text-secondary-600">AI Technical Support Assistant</p>
           </div>
         </div>
@@ -209,7 +224,7 @@ const Home: NextPage = () => {
                     <SparklesIcon className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-secondary-900 mb-3">
-                    Welcome to GuruTech Support
+                    Welcome to TroubleBot AI Support
                   </h3>
                   <p className="text-secondary-600 max-w-lg mb-6 leading-relaxed">
                     I'm your AI technical support assistant. Describe your technical issue and I'll help you troubleshoot it step by step with personalized solutions.
@@ -246,15 +261,43 @@ const Home: NextPage = () => {
                         index === messages.length - 1 ? 'animate-slide-in' : ''
                       }`}
                     >
-                      <Message
-                        variant={message.type}
-                        timestamp={message.timestamp}
-                        showTimestamp
-                        author={message.type === 'user' ? 'You' : 'GuruTech'}
-                        data-testid={`message-${message.type}`}
-                      >
-                        {message.text}
-                      </Message>
+                      {message.type === 'assistant' && message.structuredResponse ? (
+                        <div className="space-y-2">
+                          <StructuredMessage
+                            variant={message.type}
+                            timestamp={message.timestamp}
+                            showTimestamp
+                            author="TroubleBot AI"
+                            structuredResponse={message.structuredResponse}
+                            showRawResponse={showRawResponses.has(message.id)}
+                            onToggleRaw={() => toggleRawResponse(message.id)}
+                            data-testid={`structured-message-${message.type}`}
+                          />
+                          {showRawResponses.has(message.id) && (
+                            <Message
+                              variant="system"
+                              className="text-xs bg-secondary-100 border border-secondary-300"
+                            >
+                              <details className="cursor-pointer">
+                                <summary className="font-medium mb-2">Raw AI Response</summary>
+                                <pre className="whitespace-pre-wrap text-xs text-secondary-600 font-mono">
+                                  {message.text}
+                                </pre>
+                              </details>
+                            </Message>
+                          )}
+                        </div>
+                      ) : (
+                        <Message
+                          variant={message.type}
+                          timestamp={message.timestamp}
+                          showTimestamp
+                          author={message.type === 'user' ? 'You' : 'TroubleBot AI'}
+                          data-testid={`message-${message.type}`}
+                        >
+                          {message.text}
+                        </Message>
+                      )}
                     </div>
                   ))}
                   
