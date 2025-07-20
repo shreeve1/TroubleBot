@@ -3,7 +3,20 @@
     "allow": [
       "Bash(md-tree:*)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm install)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(npx vercel:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm test)",
+      "Bash(ls:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(find:*)",
+      "Bash(true)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }
