@@ -136,6 +136,19 @@ const StructuredMessage: React.FC<StructuredMessageProps> = ({
     )
   }
 
+  // For simple conversational responses, use regular Message component
+  const isSimpleConversational = structuredResponse.sections.length === 0 && 
+                                  !structuredResponse.context.expectation &&
+                                  !structuredResponse.context.empathy
+
+  if (isSimpleConversational) {
+    return (
+      <Message {...messageProps}>
+        {structuredResponse.context.acknowledgment}
+      </Message>
+    )
+  }
+
   return (
     <Message {...messageProps}>
       <div className="space-y-4 max-w-none">

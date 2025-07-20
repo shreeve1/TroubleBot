@@ -6,49 +6,58 @@ export class ResponseStructurer {
    * Create a structured prompt for AI that enforces the desired format
    */
   static createStructuredPrompt(userMessage: string): string {
-    return `You are TroubleBot AI, a professional AI technical support assistant. 
+    return `You are TroubleBot AI, a professional technical support assistant. Your approach is to ask clarifying questions FIRST before offering solutions.
 
 USER MESSAGE: "${userMessage}"
 
-Please provide a structured response that follows this EXACT format:
+CRITICAL INSTRUCTIONS:
+- Keep responses SHORT and CONCISE (maximum 2-3 sentences)
+- ALWAYS ask diagnostic questions before suggesting troubleshooting steps
+- Only provide solutions when you have sufficient context about the problem
+- Use a conversational, helpful tone
+- Focus on understanding the problem completely before solving it
 
-**CONTEXT & ACKNOWLEDGMENT:**
-[Acknowledge the user's issue clearly and show empathy. Set expectations for the interaction.]
+RESPONSE BEHAVIOR:
+- If this is the FIRST message about an issue: Ask 2-3 specific diagnostic questions
+- If you already have some context: Ask follow-up questions to clarify remaining details
+- Only when you have FULL context: Provide concise troubleshooting solutions
 
-**DIAGNOSTIC QUESTIONS:** (if needed)
-• [Specific, numbered questions to gather more information]
-• [Each question should be clear and focused]
-• [Maximum 4-5 questions to avoid overwhelming the user]
+Format your response as:
+Ok, I can help with that. To get a better idea of what's going on, can you tell me [specific question about the issue]?
 
-**ANALYSIS & EXPLANATION:** (if applicable)
-[Break down the issue and explain what might be happening]
-
-**TROUBLESHOOTING STEPS:** (if applicable)
-1. **[Step Title]** - [Clear instruction with expected outcome]
-   • Risk Level: [Safe/Caution/Advanced-only]
-   • Time: [Estimated time]
-
-2. **[Step Title]** - [Clear instruction with expected outcome]
-   • Risk Level: [Safe/Caution/Advanced-only]
-   • Time: [Estimated time]
-
-**IMMEDIATE ACTIONS:**
-• [Primary action to take right now]
-• [Secondary action if first doesn't work]
-• [When to proceed to next steps]
-
-**FOLLOW-UP GUIDANCE:**
-• [What to do if these steps don't resolve the issue]
-• [When to seek additional help]
-• [How to provide more specific information if needed]
-
-Keep your response professional, technically accurate, and user-friendly. Use bullet points and clear formatting. Estimate 2-4 minute read time for the full response.`
+Keep it conversational and focused on gathering the right information to provide targeted help.`
   }
 
   /**
    * Parse AI response into structured format
    */
   static parseStructuredResponse(aiResponse: string, userMessage: string): StructuredResponse {
+    // For conversational responses, create a simple structure
+    const isConversational = !aiResponse.includes('**') && aiResponse.length < 500
+    
+    if (isConversational) {
+      return {
+        id: Date.now().toString(),
+        type: 'diagnostic',
+        context: {
+          acknowledgment: aiResponse.trim(),
+          expectation: "",
+          empathy: ""
+        },
+        sections: [],
+        conclusion: {
+          immediateActions: [],
+          followUpGuidance: []
+        },
+        metadata: {
+          estimatedReadTime: "30 sec read",
+          complexity: 'simple',
+          timestamp: new Date().toISOString()
+        }
+      }
+    }
+
+    // Legacy structured parsing for complex responses
     const sections: StructuredResponseSection[] = []
     const lines = aiResponse.split('\n')
     
