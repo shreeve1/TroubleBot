@@ -26,7 +26,8 @@
       "Bash(docker build:*)",
       "Bash(docker-compose build:*)",
       "Bash(docker-compose up:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(kill:*)"
     ],
     "deny": []
   }

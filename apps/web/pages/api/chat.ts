@@ -15,19 +15,19 @@ export default async function handler(
   }
 
   try {
-    const { message } = req.body as AIRequest
+    const { message, image } = req.body as AIRequest
 
-    if (!message || typeof message !== 'string' || message.trim() === '') {
+    if ((!message || typeof message !== 'string' || message.trim() === '') && !image) {
       return res.status(400).json({
-        error: 'Message is required and must be a non-empty string',
+        error: 'Message or image is required',
         timestamp: new Date().toISOString(),
         status: 'error'
       })
     }
 
-    const trimmedMessage = message.trim()
+    const trimmedMessage = message?.trim() || ''
     
-    const { response: aiResponse, structured } = await aiService.processMessageWithStructure(trimmedMessage)
+    const { response: aiResponse, structured } = await aiService.processMessageWithStructure(trimmedMessage, image)
 
     res.status(200).json({
       message: 'AI response generated successfully',

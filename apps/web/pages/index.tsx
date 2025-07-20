@@ -11,7 +11,9 @@ import {
   PaperAirplaneIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  PowerIcon 
+  PowerIcon,
+  XMarkIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline'
 
 interface ChatMessage {
@@ -20,6 +22,8 @@ interface ChatMessage {
   timestamp: Date
   type: 'user' | 'assistant'
   structuredResponse?: StructuredResponse
+  image?: string // base64 encoded image data
+  imageType?: string // mime type of the image
 }
 
 const Home: NextPage = () => {
@@ -34,6 +38,7 @@ const Home: NextPage = () => {
   const [transcriptLoading, setTranscriptLoading] = useState<boolean>(false)
   const [transcriptError, setTranscriptError] = useState<string | null>(null)
   const [showRawResponses, setShowRawResponses] = useState<Set<string>>(new Set())
+  const [pastedImage, setPastedImage] = useState<{data: string, type: string} | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -59,18 +64,50 @@ const Home: NextPage = () => {
     }
   }, [isLoading])
 
+  // Handle clipboard paste events for images
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault()
+          const file = item.getAsFile()
+          if (file) {
+            const reader = new FileReader()
+            reader.onload = (event) => {
+              const result = event.target?.result as string
+              setPastedImage({
+                data: result,
+                type: file.type
+              })
+            }
+            reader.readAsDataURL(file)
+          }
+          break
+        }
+      }
+    }
+
+    document.addEventListener('paste', handlePaste)
+    return () => document.removeEventListener('paste', handlePaste)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
-    if (inputValue.trim() === '' || isLoading) {
+    if ((inputValue.trim() === '' && !pastedImage) || isLoading) {
       return
     }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      text: inputValue.trim(),
+      text: inputValue.trim() || (pastedImage ? 'Image attached' : ''),
       timestamp: new Date(),
-      type: 'user'
+      type: 'user',
+      image: pastedImage?.data,
+      imageType: pastedImage?.type
     }
 
     setMessages(prev => [...prev, userMessage])
@@ -79,7 +116,7 @@ const Home: NextPage = () => {
 
     try {
       setConnectionStatus('online')
-      const response = await apiClient.sendMessage(inputValue.trim())
+      const response = await apiClient.sendMessage(inputValue.trim(), pastedImage)
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -91,6 +128,7 @@ const Home: NextPage = () => {
 
       setMessages(prev => [...prev, assistantMessage])
       setInputValue('')
+      setPastedImage(null)
     } catch (err) {
       setConnectionStatus('offline')
       const errorMessage = err instanceof Error ? err.message : 'Failed to send message'
@@ -105,6 +143,10 @@ const Home: NextPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
+  }
+
+  const clearPastedImage = () => {
+    setPastedImage(null)
   }
 
   const handleEndSession = () => {
@@ -278,6 +320,15 @@ const Home: NextPage = () => {
                           author={message.type === 'user' ? 'You' : 'TroubleBot AI'}
                           data-testid={`message-${message.type}`}
                         >
+                          {message.image && (
+                            <div className="mb-3">
+                              <img 
+                                src={message.image} 
+                                alt="Screenshot" 
+                                className="max-w-full max-h-64 rounded-lg border border-secondary-300 shadow-sm"
+                              />
+                            </div>
+                          )}
                           {message.text}
                         </Message>
                       )}
@@ -323,6 +374,36 @@ const Home: NextPage = () => {
 
             {/* Input Area */}
             <div className="border-t border-secondary-200 bg-white p-4 shadow-lg">
+              {/* Image Preview */}
+              {pastedImage && (
+                <div className="mb-4 p-3 bg-secondary-50 border border-secondary-200 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <PhotoIcon className="w-5 h-5 text-secondary-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-medium text-secondary-900">
+                          Screenshot ready to send
+                        </p>
+                        <button
+                          type="button"
+                          onClick={clearPastedImage}
+                          className="p-1 hover:bg-secondary-200 rounded-md transition-colors"
+                        >
+                          <XMarkIcon className="w-4 h-4 text-secondary-600" />
+                        </button>
+                      </div>
+                      <img 
+                        src={pastedImage.data} 
+                        alt="Pasted screenshot" 
+                        className="max-w-full max-h-32 rounded-md border border-secondary-300"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="flex space-x-3">
                 <div className="flex-1 relative">
                   <Input
@@ -344,7 +425,7 @@ const Home: NextPage = () => {
                 </div>
                 <Button
                   type="submit"
-                  disabled={isLoading || !inputValue.trim()}
+                  disabled={isLoading || (!inputValue.trim() && !pastedImage)}
                   loading={isLoading}
                   data-testid="submit-button"
                   className="px-8 h-12 shadow-md hover:shadow-lg transition-all duration-200"
@@ -361,6 +442,7 @@ const Home: NextPage = () => {
               <div className="mt-3 flex items-center justify-between text-xs text-secondary-500">
                 <div className="flex items-center space-x-4">
                   <span>Press Enter to send</span>
+                  <span>• Ctrl+V to paste screenshots</span>
                   {connectionStatus === 'offline' && (
                     <span className="text-error-600">• Reconnecting...</span>
                   )}

@@ -1,5 +1,9 @@
 export interface ChatRequest {
   message: string
+  image?: {
+    data: string
+    type: string
+  }
 }
 
 export interface ChatResponse {
@@ -47,13 +51,18 @@ export class ApiClient {
     this.baseUrl = baseUrl
   }
 
-  async sendMessage(message: string): Promise<ChatResponse> {
+  async sendMessage(message: string, image?: {data: string, type: string} | null): Promise<ChatResponse> {
+    const requestBody: ChatRequest = { message }
+    if (image) {
+      requestBody.image = image
+    }
+
     const response = await fetch(`${this.baseUrl}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify(requestBody),
     })
 
     const data = await response.json()

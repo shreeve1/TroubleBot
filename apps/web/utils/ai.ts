@@ -5,6 +5,10 @@ import { ResponseStructurer } from './response-structurer'
 
 export interface AIRequest {
   message: string
+  image?: {
+    data: string
+    type: string
+  }
 }
 
 export interface AIResponse {
@@ -36,7 +40,7 @@ export class AIService {
     }
   }
 
-  async processMessage(userMessage: string): Promise<string> {
+  async processMessage(userMessage: string, image?: {data: string, type: string}): Promise<string> {
     // Add user message to conversation history
     this.conversationHistory.push({
       id: Date.now().toString(),
@@ -48,7 +52,7 @@ export class AIService {
     // Mock response for development/testing
     if (this.isMockMode) {
       await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API delay
-      return this.generateMockConversationalResponse(userMessage)
+      return this.generateMockConversationalResponse(userMessage, image)
     }
 
     try {
@@ -56,9 +60,25 @@ export class AIService {
         throw new Error('AI model not initialized')
       }
       
-      // Create contextual prompt with conversation history
-      const contextualPrompt = this.createContextualPrompt(userMessage)
-      const result = await this.model.generateContent(contextualPrompt)
+      let result
+      if (image) {
+        // Handle image + text input with conversational context
+        const imageData = image.data.split(',')[1] // Remove data:image/...;base64, prefix
+        const imagePart = {
+          inlineData: {
+            data: imageData,
+            mimeType: image.type
+          }
+        }
+        
+        const conversationalImagePrompt = this.createImageContextualPrompt(userMessage || "I'm getting this error")
+        result = await this.model.generateContent([conversationalImagePrompt, imagePart])
+      } else {
+        // Text-only input
+        const contextualPrompt = this.createContextualPrompt(userMessage)
+        result = await this.model.generateContent(contextualPrompt)
+      }
+      
       const response = await result.response
       const aiResponse = response.text()
       
@@ -79,8 +99,8 @@ export class AIService {
     }
   }
 
-  async processMessageWithStructure(userMessage: string): Promise<{ response: string, structured: StructuredResponse }> {
-    const rawResponse = await this.processMessage(userMessage)
+  async processMessageWithStructure(userMessage: string, image?: {data: string, type: string}): Promise<{ response: string, structured: StructuredResponse }> {
+    const rawResponse = await this.processMessage(userMessage, image)
     const structuredResponse = ResponseStructurer.parseStructuredResponse(rawResponse, userMessage)
     
     return {
@@ -120,7 +140,41 @@ Format your response as natural conversation, like:
 Keep it conversational and focused on gathering the right information to provide targeted help.`
   }
 
-  private generateMockConversationalResponse(userMessage: string): string {
+  private createImageContextualPrompt(userMessage: string): string {
+    const conversationContext = this.conversationHistory.slice(-6) // Last 3 exchanges
+    const contextText = conversationContext.map(msg => 
+      `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+    ).join('\n')
+
+    return `You are TroubleBot AI, a professional technical support assistant. Your approach is to ask clarifying questions FIRST before offering solutions.
+
+CONVERSATION HISTORY:
+${contextText}
+
+CURRENT USER MESSAGE: "${userMessage}"
+
+The user has shared a screenshot showing a technical issue. Please analyze the image and provide a conversational response.
+
+CRITICAL INSTRUCTIONS:
+- Keep responses SHORT and CONCISE (maximum 2-3 sentences)
+- Analyze what you see in the screenshot specifically
+- ALWAYS ask diagnostic questions to understand the context better
+- Use a conversational, helpful tone
+- Focus on understanding the complete problem before providing solutions
+
+RESPONSE BEHAVIOR:
+- Acknowledge what you can see in the screenshot
+- Ask 1-2 specific follow-up questions about the context or what led to this issue
+- Keep it conversational like: "I can see [what's in the screenshot]. To help troubleshoot this, can you tell me [specific question]?"
+
+Keep it conversational and focused on gathering the right information to provide targeted help.`
+  }
+
+  private generateMockConversationalResponse(userMessage: string, image?: {data: string, type: string}): string {
+    if (image) {
+      return "I can see there's a network connectivity issue with Discord shown in your screenshot. To help troubleshoot this, can you tell me if other websites are working fine, or is this affecting your entire internet connection?"
+    }
+
     const isFirstMessage = this.conversationHistory.length <= 1
     const message = userMessage.toLowerCase()
 
