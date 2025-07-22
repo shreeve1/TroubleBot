@@ -34,7 +34,7 @@ export function initializeGeminiClient(): GoogleGenerativeAI {
 
 export function getGeminiModel(client: GoogleGenerativeAI) {
   return client.getGenerativeModel({ 
-    model: 'gemini-1.5-flash',
+    model: 'gemini-1.5-pro',
     systemInstruction: TROUBLESHOOTING_ASSISTANT_PROMPT
   })
 }
