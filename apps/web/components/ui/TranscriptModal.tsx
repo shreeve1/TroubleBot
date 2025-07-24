@@ -160,9 +160,8 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
                   Ready to copy and paste into your ticketing system
                 </p>
               </div>
-              <div 
+              <div
                 className="p-6 max-h-96 overflow-y-auto"
-                data-testid="transcript-content"
                 role="textbox"
                 aria-label="Generated support transcript"
                 aria-readonly="true"

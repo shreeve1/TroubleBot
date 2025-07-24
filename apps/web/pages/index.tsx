@@ -261,9 +261,8 @@ const Home: NextPage = () => {
         <div className="flex-1 overflow-hidden">
           <div className="h-full flex flex-col">
             {/* Messages Area */}
-            <div 
+            <div
               className="flex-1 overflow-y-auto px-4 py-6 space-y-4"
-              data-testid="message-display"
             >
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8">
@@ -297,7 +296,6 @@ const Home: NextPage = () => {
                             rawText={message.text}
                             showRawResponse={showRawResponses.has(message.id)}
                             onToggleRaw={() => toggleRawResponse(message.id)}
-                            data-testid={`structured-message-${message.type}`}
                           />
                           {showRawResponses.has(message.id) && (
                             <Message
@@ -319,7 +317,6 @@ const Home: NextPage = () => {
                           timestamp={message.timestamp}
                           showTimestamp
                           author={message.type === 'user' ? 'You' : 'TroubleBot AI'}
-                          data-testid={`message-${message.type}`}
                         >
                           {message.image && (
                             <div className="mb-3">
@@ -414,7 +411,6 @@ const Home: NextPage = () => {
                     onChange={handleInputChange}
                     placeholder="Describe your technical issue in detail..."
                     disabled={isLoading}
-                    data-testid="message-input"
                     className="w-full pr-12 text-base"
                     size="lg"
                   />
