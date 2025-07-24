@@ -5,6 +5,7 @@ import handler from '../../pages/api/chat'
 jest.mock('../../utils/ai', () => ({
   aiService: {
     processMessage: jest.fn(),
+    processMessageWithStructure: jest.fn(),
   },
 }))
 
@@ -16,7 +17,10 @@ describe('/api/chat', () => {
   })
 
   it('returns AI response for valid POST request', async () => {
-    mockAiService.processMessage.mockResolvedValue('This is an AI response')
+    mockAiService.processMessageWithStructure.mockResolvedValue({
+      response: 'This is an AI response',
+      structured: { id: '1', type: 'diagnostic', context: {}, sections: [], conclusion: {}, metadata: {} }
+    })
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -34,7 +38,7 @@ describe('/api/chat', () => {
     expect(data.response).toBe('This is an AI response')
     expect(data.message).toBe('AI response generated successfully')
     expect(data.timestamp).toBeDefined()
-    expect(mockAiService.processMessage).toHaveBeenCalledWith('Hello AI')
+    expect(mockAiService.processMessageWithStructure).toHaveBeenCalledWith('Hello AI', undefined)
   })
 
   it('returns 405 for non-POST requests', async () => {
@@ -65,8 +69,8 @@ describe('/api/chat', () => {
 
     const data = JSON.parse(res._getData())
     expect(data.status).toBe('error')
-    expect(data.error).toBe('Message is required and must be a non-empty string')
-    expect(mockAiService.processMessage).not.toHaveBeenCalled()
+    expect(data.error).toBe('Message or image is required')
+    expect(mockAiService.processMessageWithStructure).not.toHaveBeenCalled()
   })
 
   it('returns 400 for whitespace-only message', async () => {
@@ -83,7 +87,7 @@ describe('/api/chat', () => {
 
     const data = JSON.parse(res._getData())
     expect(data.status).toBe('error')
-    expect(data.error).toBe('Message is required and must be a non-empty string')
+    expect(data.error).toBe('Message or image is required')
   })
 
   it('returns 400 for missing message', async () => {
@@ -98,11 +102,11 @@ describe('/api/chat', () => {
 
     const data = JSON.parse(res._getData())
     expect(data.status).toBe('error')
-    expect(data.error).toBe('Message is required and must be a non-empty string')
+    expect(data.error).toBe('Message or image is required')
   })
 
   it('handles AI service errors gracefully', async () => {
-    mockAiService.processMessage.mockRejectedValue(new Error('AI service unavailable'))
+    mockAiService.processMessageWithStructure.mockRejectedValue(new Error('AI service unavailable'))
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -121,7 +125,10 @@ describe('/api/chat', () => {
   })
 
   it('trims message content correctly', async () => {
-    mockAiService.processMessage.mockResolvedValue('Response to trimmed message')
+    mockAiService.processMessageWithStructure.mockResolvedValue({
+      response: 'Response to trimmed message',
+      structured: { id: '1', type: 'diagnostic', context: {}, sections: [], conclusion: {}, metadata: {} }
+    })
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -133,6 +140,6 @@ describe('/api/chat', () => {
     await handler(req, res)
 
     expect(res._getStatusCode()).toBe(200)
-    expect(mockAiService.processMessage).toHaveBeenCalledWith('Hello AI')
+    expect(mockAiService.processMessageWithStructure).toHaveBeenCalledWith('Hello AI', undefined)
   })
 })

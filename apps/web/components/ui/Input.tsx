@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
@@ -29,12 +29,42 @@ export interface InputProps
   error?: string
   label?: string
   helperText?: string
+  multiline?: boolean
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, size, error, label, helperText, id, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
+  ({ className, variant, size, error, label, helperText, id, type = 'text', multiline = true, ...props }, ref) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
     const hasError = error || variant === 'error'
+    
+    const shouldUseTextarea = multiline && (type === 'text' || !type)
+
+    const autoResize = () => {
+      const textarea = textareaRef.current
+      if (textarea) {
+        textarea.style.height = 'auto'
+        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px'
+      }
+    }
+
+    useEffect(() => {
+      if (shouldUseTextarea) {
+        autoResize()
+      }
+    }, [props.value, shouldUseTextarea])
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault()
+        // Trigger form submission by finding parent form and dispatching submit event
+        const form = e.currentTarget.closest('form')
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+        }
+      }
+      props.onKeyDown?.(e as any)
+    }
 
     return (
       <div className="w-full">
@@ -46,18 +76,37 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          id={inputId}
-          className={cn(
-            inputVariants({ 
-              variant: hasError ? 'error' : variant, 
-              size, 
-              className 
-            })
-          )}
-          ref={ref}
-          {...props}
-        />
+        {shouldUseTextarea ? (
+          <textarea
+            id={inputId}
+            ref={textareaRef as any}
+            className={cn(
+              inputVariants({ 
+                variant: hasError ? 'error' : variant, 
+                size, 
+                className 
+              }),
+              'resize-none overflow-y-auto min-h-[2.5rem] max-h-[150px]'
+            )}
+            onInput={autoResize}
+            onKeyDown={handleKeyDown}
+            {...(props as any)}
+          />
+        ) : (
+          <input
+            id={inputId}
+            type={type}
+            className={cn(
+              inputVariants({ 
+                variant: hasError ? 'error' : variant, 
+                size, 
+                className 
+              })
+            )}
+            ref={ref as React.RefObject<HTMLInputElement>}
+            {...props}
+          />
+        )}
         {(error || helperText) && (
           <p
             className={cn(

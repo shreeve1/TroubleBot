@@ -294,6 +294,7 @@ const Home: NextPage = () => {
                             showTimestamp
                             author="TroubleBot AI"
                             structuredResponse={message.structuredResponse}
+                            rawText={message.text}
                             showRawResponse={showRawResponses.has(message.id)}
                             onToggleRaw={() => toggleRawResponse(message.id)}
                             data-testid={`structured-message-${message.type}`}

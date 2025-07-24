@@ -39,7 +39,11 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
       <div
         className={cn(
           'flex flex-col',
-          variant === 'user' ? 'items-end' : variant === 'assistant' ? 'items-start' : 'items-center'
+          variant === 'user' 
+            ? 'items-end ml-8 sm:ml-12 lg:ml-16' 
+            : variant === 'assistant' 
+            ? 'items-start mr-8 sm:mr-12 lg:mr-16' 
+            : 'items-center'
         )}
         ref={ref}
         {...props}
