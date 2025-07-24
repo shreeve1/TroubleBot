@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { NextPage } from 'next'
 import { apiClient, type TranscriptResponse } from '../utils/api'
-import { Layout, Header, Main, Container, Button, Input, Message, Modal } from '../components/ui'
+import { Layout, Header, Main, Button, Input, Message, Modal } from '../components/ui'
 import { TranscriptModal } from '../components/ui/TranscriptModal'
 import { StructuredMessage } from '../components/ui/StructuredMessage'
 import { StructuredResponse } from '../types/structured-response'
@@ -123,7 +123,7 @@ const Home: NextPage = () => {
         text: response.response,
         timestamp: new Date(response.timestamp),
         type: 'assistant',
-        structuredResponse: (response as any).structuredResponse
+        structuredResponse: (response as { structuredResponse?: StructuredResponse }).structuredResponse
       }
 
       setMessages(prev => [...prev, assistantMessage])
@@ -273,7 +273,7 @@ const Home: NextPage = () => {
                     Welcome to TroubleBot AI Support
                   </h3>
                   <p className="text-secondary-600 max-w-lg mb-8 leading-relaxed">
-                    I'm your AI technical support assistant. Describe your technical issue and I'll help you troubleshoot it step by step with personalized solutions.
+                    I&apos;m your AI technical support assistant. Describe your technical issue and I&apos;ll help you troubleshoot it step by step with personalized solutions.
                   </p>
                 </div>
               ) : (

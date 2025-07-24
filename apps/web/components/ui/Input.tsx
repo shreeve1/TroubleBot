@@ -63,7 +63,11 @@ const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProp
           form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
         }
       }
-      props.onKeyDown?.(e as any)
+      if (shouldUseTextarea) {
+        (props.onKeyDown as unknown as ((e: React.KeyboardEvent<HTMLTextAreaElement>) => void))?.(e as React.KeyboardEvent<HTMLTextAreaElement>)
+      } else {
+        props.onKeyDown?.(e as unknown as React.KeyboardEvent<HTMLInputElement>)
+      }
     }
 
     return (
@@ -79,7 +83,7 @@ const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProp
         {shouldUseTextarea ? (
           <textarea
             id={inputId}
-            ref={textareaRef as any}
+            ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
             className={cn(
               inputVariants({ 
                 variant: hasError ? 'error' : variant, 
@@ -90,7 +94,7 @@ const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProp
             )}
             onInput={autoResize}
             onKeyDown={handleKeyDown}
-            {...(props as any)}
+            {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
           />
         ) : (
           <input

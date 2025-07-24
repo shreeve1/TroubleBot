@@ -46,7 +46,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
       
       setCopyStatus('success')
       setTimeout(() => setCopyStatus('idle'), 3000)
-    } catch (err) {
+    } catch {
       setCopyStatus('error')
       setTimeout(() => setCopyStatus('idle'), 3000)
     }

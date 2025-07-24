@@ -10,10 +10,7 @@ interface StructuredMessageProps extends Omit<MessageProps, 'children'> {
 }
 
 const StructuredMessage: React.FC<StructuredMessageProps> = ({
-  structuredResponse,
   rawText,
-  showRawResponse = false,
-  onToggleRaw,
   ...messageProps
 }) => {
 
